@@ -1,21 +1,18 @@
-class TokenIterator:
-    def __init__(self, filename):
-        f = open(filename, 'rb')
-        self.bytes = iter(f.read())
-        f.close()
-        self.token = ''
-        
-    def __iter__(self):
-        return self
-        
-    def __next__(self):
-        try:
-            byte = self.bytes.next()
-        except StopIteration:
-            if(self.token):
-                last_token = self.token
-                self.token = ''
-                return last_token
-            else:
-                raise StopIteration
-                
+class DotBuilder:
+    def __init__(self):
+        self.trees = []
+        self.vertices = []
+        self.edges = []
+        self.current = None
+    def add_root(self):
+    def add_child(self):
+    def select_child(self):
+    def save_file(self, filename):
+
+class SGFParser:
+    def __init__(self, builder):
+        self.builder = builder
+    def parse_file(filename):
+        parse_collection
+
+
