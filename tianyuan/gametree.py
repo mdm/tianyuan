@@ -1,8 +1,8 @@
 class GameTreeNode:
     def __init__(self):
         self.properties = {}
-    def add_property(self, identifier, value):
-        self.properties[identifier] = value
+    def add_property(self, identifier, values):
+        self.properties[identifier] = values
         
 class GameTree:
     def __init__(self):
@@ -35,10 +35,10 @@ class DotFileBuilder(GameTreeBuilder):
     def __init__(self, _):
         self.next_label = 1
         self.edges = []
-    def add_node(self, node):
+    def add_node(self, _):
         self.edges.append('    {} -> {};\n'.format(self.last_node, self.next_label))
         self.last_node = self.next_label
-        self.next_label++
+        self.next_label += 1
     def save(self, filename):
         dot_file = open(filename, 'w')
         dot_file.write('digraph ' + filename + ' {\n')
