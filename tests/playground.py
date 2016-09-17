@@ -15,5 +15,16 @@ def f2(data):
     raise Exception
     return data
     
-test = b'this is a test'
+test1 = b'this is a test'
 
+class c1:
+    def __init__(self):
+        self.value = None
+    def m1(self, value):
+        self.value = value
+        
+class c2:
+    def m2(self, other):
+        other.m1('tada!!')
+
+test2 = c1()
