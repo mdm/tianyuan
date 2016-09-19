@@ -29,11 +29,23 @@ class TestPropertyIdentifier(unittest.TestCase):
     def setUp(self):
         self.parser = tianyuan.sgfparser.SGFParser(tianyuan.gametree.DotFileBuilder)
     def test_single_letter(self):
-        pass
+        self.assertEqual(self.parser.parse_property_identifier(b'A[test]'), (b'[test]', 'A'))
     def test_multiple_letters(self):
+        self.assertEqual(self.parser.parse_property_identifier(b'AB[test]'), (b'[test]', 'AB'))
+    def test_non_ucletter_first(self):
+        with self.assertRaises(tianyuan.sgfparser.SGFParserError) as cm:
+            self.parser.parse_property_identifier(b'a[test]')
+        self.assertEqual(cm.exception.position, 0)
+    def test_non_ucletter_last(self):
+        self.assertEqual(self.parser.parse_property_identifier(b'Ab[test]'), (b'b[test]', 'A'))
+
+class TestPropertyIdentifier(unittest.TestCase):
+    def setUp(self):
+        self.parser = tianyuan.sgfparser.SGFParser(tianyuan.gametree.DotFileBuilder)
+    def test_single_value(self):
         pass
-    def test_non_letter_first(self):
+    def test_multiple_values(self):
         pass
-    def test_non_letter_last(self):
+    def test_illegal_identifier(self):
         pass
 

@@ -97,13 +97,13 @@ class SGFParser:
         return sgf_data, identifier, values
     def parse_property_identifier(self, sgf_data):
         identifier = b''
-        sgf_data = skip_whitespace(sgf_data)
-        if sgf_data and (sgf_data[0].decode('ascii') in string.ascii_uppercase):
-            identifier += sgf_data[0]
-            sgf_data = consume(sgf_data, 1)
-            while sgf_data and (sgf_data[0].decode('ascii') in string.ascii_uppercase):
-                identifier += sgf_data[0]
-                sgf_data = consume(sgf_data, 1)
+        sgf_data = self.skip_whitespace(sgf_data)
+        if sgf_data and (sgf_data[0:1].decode('ascii') in string.ascii_uppercase):
+            identifier += sgf_data[0:1]
+            sgf_data = self.consume(sgf_data, 1)
+            while sgf_data and (sgf_data[0:1].decode('ascii') in string.ascii_uppercase):
+                identifier += sgf_data[0:1]
+                sgf_data = self.consume(sgf_data, 1)
         else:
             raise SGFParserError(self.bytes_consumed, 'Expected uppercase letter while parsing property identifier.')
         return sgf_data, identifier.decode('ascii')
