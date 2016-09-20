@@ -33,6 +33,7 @@ class GameTreeBuilder:
         
 class DotFileBuilder(GameTreeBuilder):
     def __init__(self, _):
+        super().__init__(None)
         self.next_label = 1
         self.edges = []
     def add_node(self, _):

@@ -54,30 +54,60 @@ class TestProperty(unittest.TestCase):
 class TestNode(unittest.TestCase):
     def setUp(self):
         self.parser = tianyuan.sgfparser.SGFParser(tianyuan.gametree.DotFileBuilder)
-    def test_single_value(self):
-        pass
+    def test_empty_node(self):
+        self.assertEqual(self.parser.parse_node(b';', tianyuan.gametree.DotFileBuilder(None)), b'')
+    def test_single_property(self):
+        self.assertEqual(self.parser.parse_node(b';A[test]', tianyuan.gametree.DotFileBuilder(None)), b'')
+    def test_multiple_properties(self):
+        self.assertEqual(self.parser.parse_node(b';A[test]B[test]C[test]', tianyuan.gametree.DotFileBuilder(None)), b'')
+    def test_illegal_node(self):
+        with self.assertRaises(tianyuan.sgfparser.SGFParserError) as cm:
+            self.parser.parse_node(b'A[test]', tianyuan.gametree.DotFileBuilder(None))
+        self.assertEqual(cm.exception.position, 0)
 
 class TestSequence(unittest.TestCase):
     def setUp(self):
         self.parser = tianyuan.sgfparser.SGFParser(tianyuan.gametree.DotFileBuilder)
-    def test_single_value(self):
-        pass
+    def test_single_node(self):
+        self.assertEqual(self.parser.parse_sequence(b';A[test]', tianyuan.gametree.DotFileBuilder(None)), b'')
+    def test_multiple_nodes(self):
+        self.assertEqual(self.parser.parse_sequence(b';A[test];B[test];C[test]', tianyuan.gametree.DotFileBuilder(None)), b'')
 
 class TestGameTree(unittest.TestCase):
     def setUp(self):
         self.parser = tianyuan.sgfparser.SGFParser(tianyuan.gametree.DotFileBuilder)
-    def test_single_value(self):
-        pass
+    def test_single_sequence(self):
+        self.assertEqual(self.parser.parse_game_tree(b'(;A[test];B[test];C[test])')[0], b'')
+    def test_single_variation(self):
+        self.assertEqual(self.parser.parse_game_tree(b'(;A[test](;B[test];C[test]))')[0], b'')
+    def test_variations(self):
+        self.assertEqual(self.parser.parse_game_tree(b'(;A[test](;B[test])(;C[test]))')[0], b'')
+    def test_sequence_after_variation(self):
+        with self.assertRaises(tianyuan.sgfparser.SGFParserError) as cm:
+            self.parser.parse_game_tree(b'(;A[test](;B[test]);C[test])')
+        self.assertEqual(cm.exception.position, 19)
 
 class TestCollection(unittest.TestCase):
     def setUp(self):
         self.parser = tianyuan.sgfparser.SGFParser(tianyuan.gametree.DotFileBuilder)
-    def test_single_value(self):
-        pass
+    def test_single_game_tree(self):
+        self.assertEqual(len(self.parser.parse_collection(b'(;A[test];B[test];C[test])')), 1)
+    def test_multiple_game_trees(self):
+        self.assertEqual(len(self.parser.parse_collection(b'(;A[test];B[test];C[test])(;A[test];B[test];C[test])')), 2)
+    def test_trailing_garbage(self):
+        with self.assertRaises(tianyuan.sgfparser.SGFParserError) as cm:
+            self.parser.parse_collection(b'(;A[test](;B[test])(;C[test]))test')
+        self.assertEqual(cm.exception.position, 30)
 
 class TestHelpers(unittest.TestCase):
     def setUp(self):
         self.parser = tianyuan.sgfparser.SGFParser(tianyuan.gametree.DotFileBuilder)
-    def test_single_value(self):
+    def test_skipping_whitespace(self):
+        pass
+    def test_not_skipping_chars(self):
+        pass
+    def test_consume_single_byte(self):
+        pass
+    def test_consume_multiple_bytes(self):
         pass
 
