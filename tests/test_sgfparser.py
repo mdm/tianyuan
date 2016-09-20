@@ -39,13 +39,45 @@ class TestPropertyIdentifier(unittest.TestCase):
     def test_non_ucletter_last(self):
         self.assertEqual(self.parser.parse_property_identifier(b'Ab[test]'), (b'b[test]', 'A'))
 
-class TestPropertyIdentifier(unittest.TestCase):
+class TestProperty(unittest.TestCase):
+    def setUp(self):
+        self.parser = tianyuan.sgfparser.SGFParser(tianyuan.gametree.DotFileBuilder)
+    def test_single_value(self):
+        self.assertEqual(self.parser.parse_property(b'A[test]'), (b'', 'A', [b'test']))
+    def test_multiple_values(self):
+        self.assertEqual(self.parser.parse_property(b'AB[test][2]'), (b'', 'AB', [b'test', b'2']))
+    def test_illegal_identifier(self):
+        with self.assertRaises(tianyuan.sgfparser.SGFParserError) as cm:
+            self.parser.parse_property(b'Ab[test]')
+        self.assertEqual(cm.exception.position, 1)
+
+class TestNode(unittest.TestCase):
     def setUp(self):
         self.parser = tianyuan.sgfparser.SGFParser(tianyuan.gametree.DotFileBuilder)
     def test_single_value(self):
         pass
-    def test_multiple_values(self):
+
+class TestSequence(unittest.TestCase):
+    def setUp(self):
+        self.parser = tianyuan.sgfparser.SGFParser(tianyuan.gametree.DotFileBuilder)
+    def test_single_value(self):
         pass
-    def test_illegal_identifier(self):
+
+class TestGameTree(unittest.TestCase):
+    def setUp(self):
+        self.parser = tianyuan.sgfparser.SGFParser(tianyuan.gametree.DotFileBuilder)
+    def test_single_value(self):
+        pass
+
+class TestCollection(unittest.TestCase):
+    def setUp(self):
+        self.parser = tianyuan.sgfparser.SGFParser(tianyuan.gametree.DotFileBuilder)
+    def test_single_value(self):
+        pass
+
+class TestHelpers(unittest.TestCase):
+    def setUp(self):
+        self.parser = tianyuan.sgfparser.SGFParser(tianyuan.gametree.DotFileBuilder)
+    def test_single_value(self):
         pass
 

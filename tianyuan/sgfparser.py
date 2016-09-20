@@ -85,12 +85,12 @@ class SGFParser:
         return sgf_data
     def parse_property(self, sgf_data):
         values = []
-        sgf_data, identifier = parse_property_identifier(sgf_data)
-        sgf_data, value = parse_property_value(sgf_data)
+        sgf_data, identifier = self.parse_property_identifier(sgf_data)
+        sgf_data, value = self.parse_property_value(sgf_data)
         values.append(value)
         while True:
             try:
-                sgf_data, value = parse_property_value(sgf_data)
+                sgf_data, value = self.parse_property_value(sgf_data)
                 values.append(value)
             except SGFParserError:
                 break
