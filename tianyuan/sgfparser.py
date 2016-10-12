@@ -125,4 +125,6 @@ class SGFParser:
         else:
             raise SGFParserError(self.bytes_consumed, 'Expected "[" while parsing property value.')
         return sgf_data, value
+    def check_semantics(self, game_tree):
+        pass
 
