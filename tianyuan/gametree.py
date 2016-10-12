@@ -19,8 +19,8 @@ class GameTree:
         return self.children[node]
 
 class GameTreeBuilder:
-    def __init__(self, game_tree):
-        self.game_tree = game_tree
+    def __init__(self):
+        self.game_tree = GameTree()
         self.last_node = None
         self.variation_stack = []
     def start_variation(self):
@@ -30,19 +30,25 @@ class GameTreeBuilder:
     def add_node(self, node):
         self.game_tree.add_node(node, self.last_node)
         self.last_node = node
+    def get_game_tree(self):
+        return self.game_tree
         
 class DotFileBuilder(GameTreeBuilder):
-    def __init__(self, _):
+    def __init__(self):
+        super().__init__()
         self.next_label = 1
         self.edges = []
     def add_node(self, _):
-        self.edges.append('    {} -> {};\n'.format(self.last_node, self.next_label))
+        if self.last_node:
+            self.edges.append('    {} -> {};\n'.format(self.last_node, self.next_label))
         self.last_node = self.next_label
         self.next_label += 1
-    def save(self, filename):
+    def get_game_tree(self):
+        filename = 'test.dot'
         dot_file = open(filename, 'w')
-        dot_file.write('digraph ' + filename + ' {\n')
+        dot_file.write('digraph ' + 'test' + ' {\n')
         for edge in self.edges:
             dot_file.write(edge)
         dot_file.write('}\n')
         dot_file.close()
+        return filename

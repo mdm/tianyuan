@@ -22,60 +22,58 @@ class SGFParser:
         sgf_file = open(filename, 'rb')
         sgf_data = sgf_file.read()
         sgf_file.close()
-        return parse_collection(sgf_data)
+        return self.parse_collection(sgf_data)
     def parse_collection(self, sgf_data):
         collection = []
-        sgf_data, game_tree = parse_game_tree(sgf_data)
+        builder = self.builder_class()
+        sgf_data = self.parse_game_tree(sgf_data, builder)
         while True:
-            collection.append(game_tree)
+            collection.append(builder.get_game_tree())
             try:
-                sgf_data, game_tree = parse_game_tree(sgf_data)
+                builder = self.builder_class()
+                sgf_data = self.parse_game_tree(sgf_data, builder)
             except SGFParserError:
                 break
-        sgf_data = skip_whitespace(sgf_data)
+        sgf_data = self.skip_whitespace(sgf_data)
         if sgf_data:
             raise SGFParserError(self.bytes_consumed, 'Expected end-of-file while parsing collection.')
         return collection
-    def parse_game_tree(self, sgf_data, builder = None):
-        game_tree = None
-        sgf_data = skip_whitespace(sgf_data)
-        if sgf_data and sgf_data[0] == b'(':
-            sgf_data = consume(sgf_data, 1)
-            if not builder:
-                game_tree = gametree.GameTree()
-                builder = self.builder_class(game_tree)
+    def parse_game_tree(self, sgf_data, builder):
+        sgf_data = self.skip_whitespace(sgf_data)
+        if sgf_data and sgf_data[0:1] == b'(':
+            sgf_data = self.consume(sgf_data, 1)
             builder.start_variation()
-            sgf_data = parse_sequence(sgf_data, builder)
+            sgf_data = self.parse_sequence(sgf_data, builder)
             while True:
                 try:
-                    sgf_data, _ = parse_game_tree(sgf_data, builder)
+                    sgf_data = self.parse_game_tree(sgf_data, builder)
                 except SGFParserError:
                     break
-            sgf_data = skip_whitespace(sgf_data)
-            if sgf_data and sgf_data[0] == b')':
-                sgf_data = consume(sgf_data, 1)
+            sgf_data = self.skip_whitespace(sgf_data)
+            if sgf_data and sgf_data[0:1] == b')':
+                sgf_data = self.consume(sgf_data, 1)
                 builder.end_variation()
             else:
                 raise SGFParserError(self.bytes_consumed, 'Expected ")" while parsing game tree.')
         else:
             raise SGFParserError(self.bytes_consumed, 'Expected "(" while parsing game tree.')
-        return sgf_data, game_tree
+        return sgf_data
     def parse_sequence(self, sgf_data, builder):
-        sgf_data = parse_node(sgf_data, builder)
+        sgf_data = self.parse_node(sgf_data, builder)
         while True:
             try:
-                sgf_data = parse_node(sgf_data, builder)
+                sgf_data = self.parse_node(sgf_data, builder)
             except SGFParserError:
                 break
         return sgf_data
     def parse_node(self, sgf_data, builder):
-        sgf_data = skip_whitespace(sgf_data)
-        if sgf_data and sgf_data[0] == b';':
-            sgf_data = consume(sgf_data, 1)
-            game_tree_node = gametree.GameTreeNode()
+        sgf_data = self.skip_whitespace(sgf_data)
+        if sgf_data and sgf_data[0:1] == b';':
+            sgf_data = self.consume(sgf_data, 1)
+            game_tree_node = tianyuan.gametree.GameTreeNode()
             while True:
                 try:
-                    sgf_data, identifier, values = parse_property(sgf_data)
+                    sgf_data, identifier, values = self.parse_property(sgf_data)
                     game_tree_node.add_property(identifier, values)
                 except SGFParserError:
                     break
