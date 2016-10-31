@@ -6,6 +6,10 @@ class SGFParserError(Exception):
         self.position = position
         self.message = message
 
+class SGFSemanticError(Exception):
+    def __init__(self, message):
+        self.message = message
+
 class SGFParser:
     def __init__(self, builder_class):
         self.builder_class = builder_class
