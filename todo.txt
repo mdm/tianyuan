@@ -1,0 +1,3 @@
+* and line numbers to parser errors
+* don't save default values for properties
+* move checks for each property value type into seperate methods to allow better handling of composed value types

@@ -1,14 +1,9 @@
+import collections
+
 class GameTreeNode:
     def __init__(self):
-        self.properties = {}
-        self.raw_properties = {}
-    def add_property(self, identifier, values):
-        self.properties[identifier] = values
-    def add_raw_property(self, identifier, values):
-        if identifier in self.raw_properties:
-            raise ValueError
-        self.raw_properties[identifier] = values
-        
+        self.properties = collections.OrderedDict()
+
 class GameTree:
     def __init__(self):
         self.root = None
@@ -23,7 +18,11 @@ class GameTree:
     def get_root(self):
         return self.root
     def get_children(self, node):
-        return self.children[node]
+        return self.children.setdefault(node, [])
+    def set_root_property(self, identifier, values):
+        self.root.properties[identifier] = values
+    def get_root_property(self, identifier):
+        return self.root.properties[identifier]
 
 class GameTreeBuilder:
     def __init__(self):
@@ -51,11 +50,13 @@ class DotFileBuilder(GameTreeBuilder):
         self.last_node = self.next_label
         self.next_label += 1
     def get_game_tree(self):
-        filename = 'test.dot'
+        filename = 'tests/test.dot'
         dot_file = open(filename, 'w')
         dot_file.write('digraph ' + 'test' + ' {\n')
         for edge in self.edges:
             dot_file.write(edge)
         dot_file.write('}\n')
         dot_file.close()
-        return filename
+        game_tree = GameTree()
+        game_tree.add_node({})
+        return game_tree
