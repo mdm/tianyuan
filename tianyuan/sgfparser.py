@@ -133,7 +133,9 @@ class SGFParser:
             raise SGFParserError(self.bytes_consumed, 'Expected "[" while parsing property value.')
         return sgf_data, value
     def check_semantics(self, game_tree):
-        game_tree.get_root().properties['SZ'] = [19]
+        if 'SZ' in game_tree.get_root().properties:
+            game_tree.get_root().properties['SZ'][0] = self.validate_alternative(self.validate_composed(self.validate_number, self.validate_number), self.validate_number, game_tree.get_root().properties['SZ'][0])
+        ['SZ'] = [19]
         game_tree.get_root().properties['CA'] = ['iso-8859-1'] # TODO: don't overwrite, but check first 
         self.check_node(game_tree.get_root(), game_tree)
     def check_node(self, node, game_tree):
@@ -160,8 +162,6 @@ class SGFParser:
                 raise SGFSemanticError('List of value of property \'{property}\' must not be empty.')
         if property in ['DD', 'VW', 'TW', 'TB']: # value type possibly empty list of stone, point or move
             node.properties[property] = [self.convert_coordinate(value.decode('ascii')) for value in node.properties[property]]
-    def validate_none(self, value):
-        pass
     def validate_double(self, value):
         if value == b'1' or value == b'2':
             return int(value)
@@ -185,10 +185,25 @@ class SGFParser:
         except ValueError:
             raise SGFSemanticError('Value of property \'{property}\' must be a legal board coordinate.')    def validate_number(self, value):
         pass
+    def validate_number(self, value):
+        try:
+            value = value.decode('ascii')
+            return int(value)
+        except ValueError:
+            raise SGFSemanticError('Value must be an integer.')
     def validate_real(self, value):
-        pass
+        try:
+            value = value.decode('ascii')
+            return float(value)
+        except ValueError:
+            raise SGFSemanticError('Value must be a floating point number.')
     def validate_text(self, value):
-        pass
+        if 'CA' in game_tree.get_root().properties:
+            charset = game_tree.get_root().properties['CA']
+        else:
+            charset = 'iso-8859-1'
+        value = value.decode(charset)
+        value = value
     def validate_simple_text(self, value):
         pass
     def validate_list_or_none(self, value):
@@ -196,5 +211,7 @@ class SGFParser:
     def validate_list(self, value):
         pass
     def validate_composed(self, value):
+        pass
+    def validate_alternative(self, value):
         pass
 
