@@ -122,6 +122,15 @@ class SGFParser:
             while sgf_data and sgf_data[0:1] != b']':
                 if sgf_data[0:1] == b'\\':
                     sgf_data = self.consume(sgf_data, 1)
+                    # remove "soft" line breaks
+                    if sgf_data and sgf_data[0:1] == b'\n': 
+                        sgf_data = self.consume(sgf_data, 1)
+                        if sgf_data and sgf_data[0:1] == b'\r': 
+                            sgf_data = self.consume(sgf_data, 1)
+                    elif sgf_data and sgf_data[0:1] == b'\r': 
+                        sgf_data = self.consume(sgf_data, 1)
+                        if sgf_data and sgf_data[0:1] == b'\n': 
+                            sgf_data = self.consume(sgf_data, 1)
                 if sgf_data:
                     value += sgf_data[0:1]
                     sgf_data = self.consume(sgf_data, 1)
@@ -135,8 +144,12 @@ class SGFParser:
     def check_semantics(self, game_tree):
         if 'SZ' in game_tree.get_root().properties:
             game_tree.get_root().properties['SZ'][0] = self.validate_alternative(self.validate_composed(self.validate_number, self.validate_number), self.validate_number, game_tree.get_root().properties['SZ'][0])
-        ['SZ'] = [19]
-        game_tree.get_root().properties['CA'] = ['iso-8859-1'] # TODO: don't overwrite, but check first 
+        else:
+            game_tree.get_root().properties['SZ'] = [19]
+        if 'CA' in game_tree.get_root().properties:
+            self.validate_simple_text(game_tree.get_root().properties['CA'][0])
+        else:
+            game_tree.get_root().properties['CA'] = ['iso-8859-1']
         self.check_node(game_tree.get_root(), game_tree)
     def check_node(self, node, game_tree):
         for property in node.properties:
@@ -197,15 +210,14 @@ class SGFParser:
             return float(value)
         except ValueError:
             raise SGFSemanticError('Value must be a floating point number.')
-    def validate_text(self, value):
-        if 'CA' in game_tree.get_root().properties:
-            charset = game_tree.get_root().properties['CA']
-        else:
-            charset = 'iso-8859-1'
+    def validate_text(self, value, encoding = 'iso-8859-1'):
         value = value.decode(charset)
-        value = value
-    def validate_simple_text(self, value):
-        pass
+        lines = re.split('\r\n|\n\r|\r|\n', value)
+        lines = [re.sub('\s', ' ', line) for line in lines]
+        return '\n'.join(lines)
+    def validate_simple_text(self, value, encoding = 'iso-8859-1'):
+        value = self.validate_text(value, encoding)
+        return re.sub('\n', ' ', value)
     def validate_list_or_none(self, value):
         pass
     def validate_list(self, value):
