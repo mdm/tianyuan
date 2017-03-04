@@ -218,10 +218,10 @@ class SGFParser:
     def validate_simple_text(self, value, encoding = 'iso-8859-1'):
         value = self.validate_text(value, encoding)
         return re.sub('\n', ' ', value)
-    def validate_list_or_none(self, value):
-        pass
-    def validate_list(self, value):
-        pass
+    def validate_list_or_none(self, values):
+        return [element_validator(value) for value in values]
+    def validate_list(self, element_validator, values):
+        return [element_validator(value) for value in values]
     def validate_composed(self, value):
         pass
     def validate_alternative(self, value):
