@@ -164,16 +164,16 @@ class SGFParser:
         # TODO: check for superfluous values
         if property in ['DM', 'GB', 'GW', 'HO', 'UC', 'BM', 'TE']: # value type double
             node.properties[property][0] = self.validate_double(node.properties[property][0])
-        if property in ['PL']: # value type color
+        elif property in ['PL']: # value type color
             node.properties[property][0] = self.validate_color(node.properties[property][0])
-        if property in ['B', 'W']: # value type stone, point or move
+        elif property in ['B', 'W']: # value type stone, point or move
             node.properties[property][0] = self.validate_coordinate(node.properties[property][0])
-        if property in ['AB', 'AE', 'AW', 'CR', 'MA', 'SL', 'SQ', 'TR']: # value type list of stone, point or move
+        elif property in ['AB', 'AE', 'AW', 'CR', 'MA', 'SL', 'SQ', 'TR']: # value type list of stone, point or move
             if node.properties[property] > 0:
                 node.properties[property] = [self.convert_coordinate(value.decode('ascii')) for value in node.properties[property]]
             else:
                 raise SGFSemanticError('List of value of property \'{property}\' must not be empty.')
-        if property in ['DD', 'VW', 'TW', 'TB']: # value type possibly empty list of stone, point or move
+        elif property in ['DD', 'VW', 'TW', 'TB']: # value type possibly empty list of stone, point or move
             node.properties[property] = [self.convert_coordinate(value.decode('ascii')) for value in node.properties[property]]
     def validate_double(self, value):
         if value == b'1' or value == b'2':
@@ -218,12 +218,22 @@ class SGFParser:
     def validate_simple_text(self, value, encoding = 'iso-8859-1'):
         value = self.validate_text(value, encoding)
         return re.sub('\n', ' ', value)
-    def validate_list_or_none(self, values):
+    def validate_list_or_none(self, element_validator, values):
         return [element_validator(value) for value in values]
     def validate_list(self, element_validator, values):
-        return [element_validator(value) for value in values]
-    def validate_composed(self, value):
-        pass
-    def validate_alternative(self, value):
-        pass
+        if len(values) > 0:
+            return self.validate_list_or_none(element_validator, values)
+        else:
+            raise SGFSemanticError('List of property values must not be empty.')
+    def validate_composed(self, first_validator, second_validator, value):
+        if value.find(b':') == -1:
+            raise SGFSemanticError('Value must contain \':\'.')
+        else:
+            parts = value.split(b':')
+            return first_validator(parts[0]), second_validator(parts[1])
+    def validate_alternative(self, first_validator, second_validator, value):
+        try:
+            return first_validator(value)
+        except SGFSemanticError:
+            return second_validator(value)
 
